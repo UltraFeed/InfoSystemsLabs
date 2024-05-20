@@ -83,8 +83,6 @@ internal sealed class Composite
 
 	internal sealed class CompositeShape : Container
 	{
-		// Класс для представления составных контейнеров фигур
-
 		public override string Draw ()
 		{
 			StringBuilder sb = new();
@@ -99,7 +97,6 @@ internal sealed class Composite
 	}
 	public static void Execute ()
 	{
-		// Создание объектов геометрических фигур
 		Circle circle1 = new()
 		{
 			CX = 205,
@@ -129,16 +126,6 @@ internal sealed class Composite
 			Stroke = "black"
 		};
 
-		Circle circle2 = new()
-		{
-			CX = 115,
-			CY = 50,
-			R = 100,
-			Fill = "black",
-			StrokeWidth = 5,
-			Stroke = "black"
-		};
-
 		Rectangle rectangle2 = new()
 		{
 			X = 70,
@@ -158,46 +145,16 @@ internal sealed class Composite
 			Stroke = "black"
 		};
 
-		Circle circle3 = new()
-		{
-			CX = 115,
-			CY = 50,
-			R = 70,
-			Fill = "white",
-			StrokeWidth = 5,
-			Stroke = "black"
-		};
-
-		Rectangle rectangle3 = new()
-		{
-			X = 40,
-			Y = 70,
-			Width = 100,
-			Height = 120,
-			Fill = "white",
-			StrokeWidth = 2,
-			Stroke = "black"
-		};
-
-		// Создание составных контейнеров
 		CompositeShape composite1 = new();
 		composite1.Add(circle1);
 		composite1.Add(rectangle1);
 		composite1.Add(polygon1);
 
 		CompositeShape composite2 = new();
-		composite2.Add(circle2);
 		composite2.Add(rectangle2);
 		composite2.Add(polygon2);
 
-		CompositeShape composite3 = new();
-		composite3.Add(circle3);
-		composite3.Add(rectangle3);
-
 		composite1.Add(composite2);
-		composite2.Add(composite3);
-
-		// Создание SVG-файла
 
 		StringBuilder svgContent = new();
 		svgContent.AppendLine(@"<!DOCTYPE html>");
@@ -212,7 +169,6 @@ internal sealed class Composite
 		svgContent.AppendLine(@"</body>");
 		svgContent.AppendLine(@"</html>");
 
-		// Сохранение SVG-файла
 		string filePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads", "output.html");
 
 		if (File.Exists(filePath))
