@@ -7,36 +7,18 @@ internal sealed class Composite
 {
 	internal abstract class Shape
 	{
-		public string Fill
-		{
-			get; set;
-		}
-		public string Stroke
-		{
-			get; set;
-		}
-		public int StrokeWidth
-		{
-			get; set;
-		}
+		public string Fill { get; set; }
+		public string Stroke { get; set; }
+		public int StrokeWidth { get; set; }
 
 		public abstract string Draw ();
 	}
 
 	internal sealed class Circle : Shape
 	{
-		public required int CX
-		{
-			get; set;
-		}
-		public required int CY
-		{
-			get; set;
-		}
-		public required int R
-		{
-			get; set;
-		}
+		public required int CX { get; set; }
+		public required int CY { get; set; }
+		public required int R { get; set; }
 
 		public override string Draw ()
 		{
@@ -46,22 +28,10 @@ internal sealed class Composite
 
 	internal sealed class Rectangle : Shape
 	{
-		public required int X
-		{
-			get; set;
-		}
-		public required int Y
-		{
-			get; set;
-		}
-		public required int Width
-		{
-			get; set;
-		}
-		public required int Height
-		{
-			get; set;
-		}
+		public required int X { get; set; }
+		public required int Y { get; set; }
+		public required int Width { get; set; }
+		public required int Height { get; set; }
 
 		public override string Draw ()
 		{
@@ -71,10 +41,7 @@ internal sealed class Composite
 
 	internal sealed class Polygon : Shape
 	{
-		public required List<Point> Points
-		{
-			get; set;
-		}
+		public required List<Point> Points { get; set; }
 
 		public override string Draw ()
 		{
@@ -95,14 +62,8 @@ internal sealed class Composite
 
 	internal sealed class Point
 	{
-		public int X
-		{
-			get; set;
-		}
-		public int Y
-		{
-			get; set;
-		}
+		public int X { get; set; }
+		public int Y { get; set; }
 	}
 
 	internal abstract class Container : Shape
