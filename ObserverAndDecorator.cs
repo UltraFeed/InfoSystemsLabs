@@ -12,7 +12,7 @@ internal sealed class ObserverAndDecorator
 		void UpdateView (object? sender, EventArgs args);
 	}
 
-	internal sealed class TableView : IView
+	private sealed class TableView : IView
 	{
 		private static string GenerateHTML (Dictionary<int, char> data)
 		{
@@ -170,9 +170,9 @@ internal sealed class ObserverAndDecorator
 		}
 
 		private readonly TableModel model;
-		public readonly string FilePath;
+		internal readonly string FilePath;
 
-		public TableView (TableModel model, string filePath)
+		internal TableView (TableModel model, string filePath)
 		{
 			this.model = model;
 			FilePath = filePath;
@@ -184,15 +184,15 @@ internal sealed class ObserverAndDecorator
 	{
 		private Dictionary<int, char> data = [];
 
-		public event EventHandler? DataChanged;
+		internal event EventHandler? DataChanged;
 
-		public void SetData (Dictionary<int, char> newData)
+		internal void SetData (Dictionary<int, char> newData)
 		{
 			data = newData;
 			NotifyObservers();
 		}
 
-		public Dictionary<int, char> GetData ()
+		internal Dictionary<int, char> GetData ()
 		{
 			return data;
 		}
@@ -264,7 +264,7 @@ internal sealed class ObserverAndDecorator
 			Console.WriteLine("Добавлена синяя рамка к представлению.");
 		}
 	}
-	public static void Execute ()
+	internal static void Execute ()
 	{
 		string fileName = "output.html";
 		string filePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads", fileName);

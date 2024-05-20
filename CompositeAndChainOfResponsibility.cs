@@ -6,9 +6,9 @@ internal sealed class CompositeAndChainOfResponsibility
 {
 	internal abstract class Shape
 	{
-		public string? Fill { get; set; }
-		public string? Stroke { get; set; }
-		public int StrokeWidth { get; set; }
+		internal string? Fill { get; set; }
+		internal string? Stroke { get; set; }
+		internal int StrokeWidth { get; set; }
 
 		public abstract string Draw ();
 
@@ -17,9 +17,9 @@ internal sealed class CompositeAndChainOfResponsibility
 
 	internal sealed class Circle : Shape
 	{
-		public required int CX { get; set; }
-		public required int CY { get; set; }
-		public required int R { get; set; }
+		internal required int CX { get; set; }
+		internal required int CY { get; set; }
+		internal required int R { get; set; }
 
 		public override string Draw ()
 		{
@@ -63,10 +63,10 @@ internal sealed class CompositeAndChainOfResponsibility
 
 	internal sealed class Rectangle : Shape
 	{
-		public required int X { get; set; }
-		public required int Y { get; set; }
-		public required int Width { get; set; }
-		public required int Height { get; set; }
+		internal required int X { get; set; }
+		internal required int Y { get; set; }
+		internal required int Width { get; set; }
+		internal required int Height { get; set; }
 
 		public override string Draw ()
 		{
@@ -108,7 +108,7 @@ internal sealed class CompositeAndChainOfResponsibility
 
 	internal sealed class Polygon : Shape
 	{
-		public required List<Point> Points { get; set; }
+		internal required List<Point> Points { get; set; }
 
 		public override string Draw ()
 		{
@@ -187,20 +187,20 @@ internal sealed class CompositeAndChainOfResponsibility
 
 	internal sealed class Point
 	{
-		public int X { get; set; }
-		public int Y { get; set; }
+		internal int X { get; set; }
+		internal int Y { get; set; }
 	}
 
 	internal abstract class Container : Shape
 	{
-		protected List<Shape> Shapes { get; } = [];
+		private protected List<Shape> Shapes { get; } = [];
 
-		public void Add (Shape shape)
+		internal void Add (Shape shape)
 		{
 			Shapes.Add(shape);
 		}
 
-		public void Remove (Shape shape)
+		internal void Remove (Shape shape)
 		{
 			Shapes.Remove(shape);
 		}
@@ -235,7 +235,7 @@ internal sealed class CompositeAndChainOfResponsibility
 		Print,
 		Help
 	}
-	public static void Execute ()
+	internal static void Execute ()
 	{
 		// Создание объектов геометрических фигур
 		Circle circle1 = new()
