@@ -2,8 +2,8 @@
 {
 	private static void Main ()
 	{
-		ChainOfResponsibility.Execute();
-		//Composite.Execute();
+		//ChainOfResponsibility.Execute();
+		Composite.Execute();
 		//Decorator.Execute();
 		//Observer.Execute();
 	}

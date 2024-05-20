@@ -237,27 +237,29 @@ internal sealed class Composite
 		composite2.Add(composite3);
 
 		// Создание SVG-файла
-		string svgContent = $@"<?xml version=""1.0"" encoding=""utf-8""?>
-<!DOCTYPE svg PUBLIC ""-//W3C//DTD SVG 1.1//EN"" ""http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd"">
-<html>
-<head>
-    <title>SVG-графика</title>
-</head>
-<body>
-    <svg width=""500"" height=""500"" version=""1.1"" id=""Layer_1"" xmlns=""http://www.w3.org/2000/svg"" xmlns:xlink=""http://www.w3.org/1999/xlink"" enable-background=""new 0 0 386 388"" xml:space=""preserve"">
-{composite1.Draw()}    </svg>
-</body>
-</html>";
+
+		StringBuilder svgContent = new();
+		svgContent.AppendLine(@"<!DOCTYPE html>");
+		svgContent.AppendLine(@"<html>");
+		svgContent.AppendLine(@"<head>");
+		svgContent.AppendLine(@"    <title>SVG-графика</title>");
+		svgContent.AppendLine(@"</head>");
+		svgContent.AppendLine(@"<body>");
+		svgContent.AppendLine(@"    <svg width=""500"" height=""500"" version=""1.1"" id=""Layer_1"" xmlns=""http://www.w3.org/2000/svg"" xmlns:xlink=""http://www.w3.org/1999/xlink"" enable-background=""new 0 0 386 388"" xml:space=""preserve"">");
+		svgContent.AppendLine(composite1.Draw());
+		svgContent.AppendLine(@"    </svg>");
+		svgContent.AppendLine(@"</body>");
+		svgContent.AppendLine(@"</html>");
 
 		// Сохранение SVG-файла
-		string filePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads", "output.svg");
+		string filePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads", "output.html");
 
 		if (File.Exists(filePath))
 		{
 			File.Delete(filePath);
 		}
 
-		File.WriteAllText(filePath, svgContent);
+		File.WriteAllText(filePath, svgContent.ToString());
 
 		Console.WriteLine($"SVG-файл успешно создан: {filePath}");
 		Console.ReadLine();
