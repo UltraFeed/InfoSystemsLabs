@@ -5,7 +5,7 @@
 using System.Security.Cryptography;
 using System.Text;
 
-internal sealed class Decorator
+internal sealed class ObserverAndDecorator
 {
 	internal interface IView
 	{

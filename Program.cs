@@ -3,7 +3,6 @@
 	private static void Main ()
 	{
 		//ChainOfResponsibility.Execute();
-		//Composite.Execute();
-		Decorator.Execute();
+		ObserverAndDecorator.Execute();
 	}
 }
