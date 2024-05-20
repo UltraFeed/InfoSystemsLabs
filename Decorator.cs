@@ -1,12 +1,8 @@
 ﻿#pragma warning disable CA1303
 #pragma warning disable CA1305
-#pragma warning disable CA1310
-#pragma warning disable CA5394
-#pragma warning disable CS8618
-#pragma warning disable IDE0290
 #pragma warning disable IDE0058
-#pragma warning disable IDE0059
 
+using System.Security.Cryptography;
 using System.Text;
 
 internal sealed class Decorator
@@ -29,23 +25,22 @@ internal sealed class Decorator
 			sb.AppendLine("<style>");
 			sb.AppendLine("table {");
 			sb.AppendLine("    border-collapse: collapse;");
-			sb.AppendLine("    width: 300px; /* Ширина таблицы */");
+			sb.AppendLine("    width: 300px;");
 			sb.AppendLine("}");
 			sb.AppendLine("td {");
-			sb.AppendLine("    border: 1px solid black; /* Граница ячеек */");
-			sb.AppendLine("    padding: 8px; /* Внутренний отступ ячеек */");
-			sb.AppendLine("    text-align: center; /* Выравнивание текста по центру в ячейках */");
+			sb.AppendLine("    border: 1px solid black;");
+			sb.AppendLine("    padding: 8px;");
+			sb.AppendLine("    text-align: center;");
 			sb.AppendLine("}");
 			sb.AppendLine("canvas {");
-			sb.AppendLine("    border: 1px solid black; /* Граница для элемента canvas */");
-			sb.AppendLine("    margin-top: 10px; /* Отступ сверху для гистограммы */");
+			sb.AppendLine("    border: 1px solid black;");
+			sb.AppendLine("    margin-top: 10px;");
 			sb.AppendLine("}");
 			sb.AppendLine("</style>");
 			sb.AppendLine("</head>");
 			sb.AppendLine("<body>");
 			sb.AppendLine("<table id=\"Table\">");
 
-			// Добавляем первую строку с названиями
 			sb.AppendLine("<tr>");
 			foreach (KeyValuePair<int, char> pair in data)
 			{
@@ -54,7 +49,6 @@ internal sealed class Decorator
 
 			sb.AppendLine("</tr>");
 
-			// Добавляем вторую строку с данными
 			sb.AppendLine("<tr>");
 			foreach (KeyValuePair<int, char> pair in data)
 			{
@@ -82,9 +76,9 @@ internal sealed class Decorator
 			// Генерация цветовой палитры для каждого символа
 			for (int i = 0; i < data.Count; i++)
 			{
-				int red = i * 70 % 255; // Генерация значения красного цвета
-				int green = i * 130 % 255; // Генерация значения зеленого цвета
-				int blue = i * 200 % 255; // Генерация значения синего цвета
+				int red = i * 70 % 255;
+				int green = i * 130 % 255;
+				int blue = i * 200 % 255;
 				sb.AppendLine($"                'rgba({red}, {green}, {blue}, 0.2)',");
 			}
 
@@ -94,9 +88,9 @@ internal sealed class Decorator
 			// Генерация цветов границ для каждого символа
 			for (int i = 0; i < data.Count; i++)
 			{
-				int red = i * 70 % 255; // Генерация значения красного цвета
-				int green = i * 130 % 255; // Генерация значения зеленого цвета
-				int blue = i * 200 % 255; // Генерация значения синего цвета
+				int red = i * 70 % 255;
+				int green = i * 130 % 255;
+				int blue = i * 200 % 255;
 				sb.AppendLine($"                'rgba({red}, {green}, {blue}, 1)',");
 			}
 
@@ -130,9 +124,9 @@ internal sealed class Decorator
 			// Генерация цветовой палитры для каждого символа для круговой диаграммы
 			for (int i = 0; i < data.Count; i++)
 			{
-				int red = i * 70 % 255; // Генерация значения красного цвета
-				int green = i * 130 % 255; // Генерация значения зеленого цвета
-				int blue = i * 200 % 255; // Генерация значения синего цвета
+				int red = i * 70 % 255;
+				int green = i * 130 % 255;
+				int blue = i * 200 % 255;
 				sb.AppendLine($"                'rgba({red}, {green}, {blue}, 0.2)',");
 			}
 
@@ -142,9 +136,9 @@ internal sealed class Decorator
 			// Генерация цветов границ для каждого символа для круговой диаграммы
 			for (int i = 0; i < data.Count; i++)
 			{
-				int red = i * 70 % 255; // Генерация значения красного цвета
-				int green = i * 130 % 255; // Генерация значения зеленого цвета
-				int blue = i * 200 % 255; // Генерация значения синего цвета
+				int red = i * 70 % 255;
+				int green = i * 130 % 255;
+				int blue = i * 200 % 255;
 				sb.AppendLine($"                'rgba({red}, {green}, {blue}, 1)',");
 			}
 
@@ -169,9 +163,9 @@ internal sealed class Decorator
 
 		public void UpdateView (object? sender, EventArgs args)
 		{
-			Dictionary<int, char> data = model.GetData(); // Получаем текущие данные модели
-			string markupHTML = GenerateHTML(data); // Генерация HTML-разметки и запись в файл
-			File.WriteAllText(FilePath, markupHTML); // Запись HTML-разметки в файл
+			Dictionary<int, char> data = model.GetData();
+			string markupHTML = GenerateHTML(data);
+			File.WriteAllText(FilePath, markupHTML);
 			Console.WriteLine($"Файл {FilePath} обновлен.");
 		}
 
@@ -190,7 +184,7 @@ internal sealed class Decorator
 	{
 		private Dictionary<int, char> data = [];
 
-		public event EventHandler DataChanged;
+		public event EventHandler? DataChanged;
 
 		public void SetData (Dictionary<int, char> newData)
 		{
@@ -209,14 +203,9 @@ internal sealed class Decorator
 		}
 	}
 
-	internal sealed class TableController
+	internal sealed class TableController (TableModel model)
 	{
-		private readonly TableModel model;
-
-		public TableController (TableModel model)
-		{
-			this.model = model;
-		}
+		private readonly TableModel model = model;
 
 		public void ChangeData (Dictionary<int, char> newData)
 		{
@@ -224,14 +213,9 @@ internal sealed class Decorator
 		}
 	}
 
-	internal sealed class BlueBorderDecorator : IView
+	internal sealed class BlueBorderDecorator (IView decoratedView) : IView
 	{
-		private readonly IView decoratedView;
-
-		public BlueBorderDecorator (IView decoratedView)
-		{
-			this.decoratedView = decoratedView;
-		}
+		private readonly IView decoratedView = decoratedView;
 
 		public void UpdateView (object? sender, EventArgs args)
 		{
@@ -241,7 +225,7 @@ internal sealed class Decorator
 			string tableHTML = File.ReadAllText(((TableView) decoratedView).FilePath);
 
 			// Найдем индекс начала таблицы в HTML
-			int tableStartIndex = tableHTML.IndexOf("<table");
+			int tableStartIndex = tableHTML.IndexOf("<table", StringComparison.OrdinalIgnoreCase);
 			if (tableStartIndex != -1)
 			{
 				// Вставляем стиль с синей рамкой перед началом таблицы
@@ -250,11 +234,11 @@ internal sealed class Decorator
 			}
 
 			// Найдем индекс начала скрипта гистограммы в HTML
-			int chartScriptStartIndex = tableHTML.IndexOf("type: 'bar'");
+			int chartScriptStartIndex = tableHTML.IndexOf("type: 'bar'", StringComparison.OrdinalIgnoreCase);
 			if (chartScriptStartIndex != -1)
 			{
 				// Заменяем цвет рамок и фона для гистограммы на темно-синий
-				int datasetsIndex = tableHTML.IndexOf("datasets: [{", chartScriptStartIndex);
+				int datasetsIndex = tableHTML.IndexOf("datasets: [{", chartScriptStartIndex, StringComparison.OrdinalIgnoreCase);
 				int closingBracketIndex = tableHTML.IndexOf('}', datasetsIndex);
 				if (datasetsIndex != -1 && closingBracketIndex != -1)
 				{
@@ -263,11 +247,11 @@ internal sealed class Decorator
 			}
 
 			// Найдем индекс начала скрипта круговой диаграммы в HTML
-			int pieChartScriptStartIndex = tableHTML.IndexOf("type: 'pie'");
+			int pieChartScriptStartIndex = tableHTML.IndexOf("type: 'pie'", StringComparison.OrdinalIgnoreCase);
 			if (pieChartScriptStartIndex != -1)
 			{
 				// Заменяем цвет рамок и фона для круговой диаграммы на темно-синий
-				int datasetsIndex = tableHTML.IndexOf("datasets: [{", pieChartScriptStartIndex);
+				int datasetsIndex = tableHTML.IndexOf("datasets: [{", pieChartScriptStartIndex, StringComparison.OrdinalIgnoreCase);
 				int closingBracketIndex = tableHTML.IndexOf('}', datasetsIndex);
 				if (datasetsIndex != -1 && closingBracketIndex != -1)
 				{
@@ -275,7 +259,6 @@ internal sealed class Decorator
 				}
 			}
 
-			// Перезаписываем файл с обновленным HTML-кодом
 			File.WriteAllText(((TableView) decoratedView).FilePath, tableHTML);
 
 			Console.WriteLine("Добавлена синяя рамка к представлению.");
@@ -298,13 +281,12 @@ internal sealed class Decorator
 		Console.WriteLine($"Программа запущена. Изменения данных будут сохраняться в файле {fileName}");
 		Console.WriteLine($"{filePath}");
 
-		// Декорируем представление синей рамкой
 		BlueBorderDecorator blueBorderView = new(view);
 
 		while (true)
 		{
 			Dictionary<int, char> data = GenerateRandomData();
-			controller.ChangeData(data); // Изменяем данные модели
+			controller.ChangeData(data);
 
 			Console.WriteLine($"Установлены новые данные:");
 
@@ -315,28 +297,25 @@ internal sealed class Decorator
 
 			Console.WriteLine();
 
-			// Вызываем метод UpdateView у декорированного объекта
-			//blueBorderView.UpdateView(null, EventArgs.Empty);
+			blueBorderView.UpdateView(null, EventArgs.Empty);
 
-			// Пауза в 5 секунд перед следующим изменением данных
 			Thread.Sleep(5000);
 		}
 	}
 
 	private static Dictionary<int, char> GenerateRandomData ()
 	{
-		Random random = new();
-		int count = random.Next(1, 27); // Генерируем случайное количество символов от 1 до 26, так как в алфавите 26 букв
-
+		using RandomNumberGenerator rng = RandomNumberGenerator.Create();
+		int count = GetRandomNumber(rng, 1, 27); // Генерируем случайное количество символов от 1 до 26, так как в алфавите 26 букв
 		Dictionary<int, char> data = [];
-		HashSet<int> usedKeys = []; // Хранит уже использованные ключи
+		HashSet<int> usedKeys = [];
 
 		for (int i = 0; i < count; i++)
 		{
 			int keyValue;
 			do
 			{
-				keyValue = random.Next(65, 91); // Генерируем случайный ASCII код для больших букв английского алфавита (65-90)
+				keyValue = GetRandomNumber(rng, 65, 91); // Генерируем случайный ASCII код для больших букв английского алфавита (65-90)
 			} while (!usedKeys.Add(keyValue)); // Проверяем уникальность ключа
 
 			char letter = (char) keyValue; // Получаем символ по ASCII коду
@@ -344,5 +323,13 @@ internal sealed class Decorator
 		}
 
 		return data;
+	}
+
+	private static int GetRandomNumber (RandomNumberGenerator rng, int minValue, int maxValue)
+	{
+		byte [] uint32Buffer = new byte [4];
+		rng.GetBytes(uint32Buffer);
+		uint randomValue = BitConverter.ToUInt32(uint32Buffer, 0);
+		return (int) (minValue + (randomValue % (maxValue - minValue)));
 	}
 }

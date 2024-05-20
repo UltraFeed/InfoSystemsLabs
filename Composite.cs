@@ -1,5 +1,4 @@
-﻿#pragma warning disable CS8618
-#pragma warning disable CA1305
+﻿#pragma warning disable CA1305
 #pragma warning disable IDE0058
 
 using System.Text;
@@ -7,8 +6,8 @@ internal sealed class Composite
 {
 	internal abstract class Shape
 	{
-		public string Fill { get; set; }
-		public string Stroke { get; set; }
+		public string? Fill { get; set; }
+		public string? Stroke { get; set; }
 		public int StrokeWidth { get; set; }
 
 		public abstract string Draw ();
