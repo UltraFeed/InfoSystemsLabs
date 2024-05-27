@@ -1,335 +1,177 @@
 ﻿#pragma warning disable CA1303
-#pragma warning disable CA1305
-#pragma warning disable IDE0058
+#pragma warning disable CS8604
 
+using System.Reflection;
 using System.Security.Cryptography;
-using System.Text;
+using RazorLight;
 
 internal sealed class ObserverAndDecorator
 {
-	internal interface IView
-	{
-		void UpdateView (object? sender, EventArgs args);
-	}
+    internal interface IView
+    {
+        void UpdateView (object? sender, EventArgs args);
+    }
 
-	private sealed class TableView : IView
-	{
-		private static string GenerateHTML (Dictionary<int, char> data)
-		{
-			StringBuilder sb = new();
-			sb.AppendLine("<!DOCTYPE html>");
-			sb.AppendLine("<html lang=\"ru\">");
-			sb.AppendLine("<head>");
-			sb.AppendLine("<meta charset=\"UTF-8\">");
-			sb.AppendLine("<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">");
-			sb.AppendLine("<style>");
-			sb.AppendLine("table {");
-			sb.AppendLine("    border-collapse: collapse;");
-			sb.AppendLine("    width: 300px;");
-			sb.AppendLine("}");
-			sb.AppendLine("td {");
-			sb.AppendLine("    border: 1px solid black;");
-			sb.AppendLine("    padding: 8px;");
-			sb.AppendLine("    text-align: center;");
-			sb.AppendLine("}");
-			sb.AppendLine("canvas {");
-			sb.AppendLine("    border: 1px solid black;");
-			sb.AppendLine("    margin-top: 10px;");
-			sb.AppendLine("}");
-			sb.AppendLine("</style>");
-			sb.AppendLine("</head>");
-			sb.AppendLine("<body>");
-			sb.AppendLine("<table id=\"Table\">");
+    private sealed class TableView : IView
+    {
+        private readonly TableModel model;
+        internal readonly string FilePath;
 
-			sb.AppendLine("<tr>");
-			foreach (KeyValuePair<int, char> pair in data)
-			{
-				sb.AppendLine($"<td>{pair.Value}</td>");
-			}
+        internal TableView (TableModel model, string filePath)
+        {
+            this.model = model;
+            FilePath = filePath;
+            model.DataChanged += UpdateView; // Подписываемся на событие изменения данных
+        }
 
-			sb.AppendLine("</tr>");
+        public void UpdateView (object? sender, EventArgs args)
+        {
+            Dictionary<int, char> data = model.GetData();
+            string markupHTML = RenderRazorViewToString("TableView", data);
+            File.WriteAllText(FilePath, markupHTML);
+            Console.WriteLine($"Файл {FilePath} обновлен.");
+        }
 
-			sb.AppendLine("<tr>");
-			foreach (KeyValuePair<int, char> pair in data)
-			{
-				sb.AppendLine($"<td>{pair.Key}</td>");
-			}
+        private static string RenderRazorViewToString (string viewName, object model)
+        {
+            RazorLightEngine razorEngine = new RazorLightEngineBuilder()
+                .UseFileSystemProject(Directory.GetCurrentDirectory())
+                .UseMemoryCachingProvider()
+                .Build();
 
-			sb.AppendLine("</tr>");
+            string templatePath = "InfoSystemsLabs.resources.ObserverAndDecorator.cshtml";
+            string template;
 
-			sb.AppendLine("</table>");
+            using (Stream? stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(templatePath))
+            {
+                using StreamReader reader = new(stream);
+                template = reader.ReadToEnd();
+            }
 
-			// Генерация гистограммы
-			sb.AppendLine("<script src=\"https://cdn.jsdelivr.net/npm/chart.js\"></script>");
-			sb.AppendLine("<canvas id=\"myChart\" width=\"400\" height=\"200\"></canvas>");
-			sb.AppendLine("<script>");
-			sb.AppendLine("var ctx = document.getElementById('myChart').getContext('2d');");
-			sb.AppendLine("var myChart = new Chart(ctx, {");
-			sb.AppendLine("    type: 'bar',");
-			sb.AppendLine("    data: {");
-			sb.AppendLine("        labels: [" + string.Join(",", data.Select(pair => $"'{pair.Value}'")) + "],");
-			sb.AppendLine("        datasets: [{");
-			sb.AppendLine("            label: 'Values',");
-			sb.AppendLine("            data: [" + string.Join(",", data.Select(pair => pair.Key)) + "],");
-			sb.AppendLine("            backgroundColor: [");
+            // Компилируем и рендерим шаблон
+            template = razorEngine.CompileRenderStringAsync(viewName, template, model).Result;
+            return template;
+        }
+    }
+    internal sealed class TableModel
+    {
+        private Dictionary<int, char> data = [];
 
-			// Генерация цветовой палитры для каждого символа
-			for (int i = 0; i < data.Count; i++)
-			{
-				int red = i * 70 % 255;
-				int green = i * 130 % 255;
-				int blue = i * 200 % 255;
-				sb.AppendLine($"                'rgba({red}, {green}, {blue}, 0.2)',");
-			}
+        internal event EventHandler? DataChanged;
 
-			sb.AppendLine("            ],");
-			sb.AppendLine("            borderColor: [");
+        internal void SetData (Dictionary<int, char> newData)
+        {
+            data = newData;
+            NotifyObservers();
+        }
 
-			// Генерация цветов границ для каждого символа
-			for (int i = 0; i < data.Count; i++)
-			{
-				int red = i * 70 % 255;
-				int green = i * 130 % 255;
-				int blue = i * 200 % 255;
-				sb.AppendLine($"                'rgba({red}, {green}, {blue}, 1)',");
-			}
+        internal Dictionary<int, char> GetData ()
+        {
+            return data;
+        }
 
-			sb.AppendLine("            ],");
-			sb.AppendLine("            borderWidth: 2");
-			sb.AppendLine("        }]");
-			sb.AppendLine("    },");
-			sb.AppendLine("    options: {");
-			sb.AppendLine("        scales: {");
-			sb.AppendLine("            y: {");
-			sb.AppendLine("                beginAtZero: true");
-			sb.AppendLine("            }");
-			sb.AppendLine("        }");
-			sb.AppendLine("    }");
-			sb.AppendLine("});");
-			sb.AppendLine("</script>");
+        private void NotifyObservers ()
+        {
+            DataChanged?.Invoke(this, EventArgs.Empty);
+        }
+    }
 
-			// Код для создания круговой диаграммы
-			sb.AppendLine("<canvas id=\"pieChart\" width=\"400\" height=\"400\"></canvas>");
-			sb.AppendLine("<script>");
-			sb.AppendLine("var ctx_pie = document.getElementById('pieChart').getContext('2d');");
-			sb.AppendLine("var myPieChart = new Chart(ctx_pie, {");
-			sb.AppendLine("    type: 'pie',");
-			sb.AppendLine("    data: {");
-			sb.AppendLine("        labels: [" + string.Join(",", data.Select(pair => $"'{pair.Value}'")) + "],");
-			sb.AppendLine("        datasets: [{");
-			sb.AppendLine("            label: 'Values',");
-			sb.AppendLine("            data: [" + string.Join(",", data.Select(pair => pair.Key)) + "],");
-			sb.AppendLine("            backgroundColor: [");
+    internal sealed class TableController (TableModel model)
+    {
+        private readonly TableModel model = model;
 
-			// Генерация цветовой палитры для каждого символа для круговой диаграммы
-			for (int i = 0; i < data.Count; i++)
-			{
-				int red = i * 70 % 255;
-				int green = i * 130 % 255;
-				int blue = i * 200 % 255;
-				sb.AppendLine($"                'rgba({red}, {green}, {blue}, 0.2)',");
-			}
+        public void ChangeData (Dictionary<int, char> newData)
+        {
+            model.SetData(newData);
+        }
+    }
 
-			sb.AppendLine("            ],");
-			sb.AppendLine("            borderColor: [");
+    internal sealed class BlueBorderDecorator (IView decoratedView) : IView
+    {
+        private readonly IView decoratedView = decoratedView;
 
-			// Генерация цветов границ для каждого символа для круговой диаграммы
-			for (int i = 0; i < data.Count; i++)
-			{
-				int red = i * 70 % 255;
-				int green = i * 130 % 255;
-				int blue = i * 200 % 255;
-				sb.AppendLine($"                'rgba({red}, {green}, {blue}, 1)',");
-			}
+        public void UpdateView (object? sender, EventArgs args)
+        {
+            decoratedView.UpdateView(sender, args);
 
-			sb.AppendLine("            ],");
-			sb.AppendLine("            borderWidth: 2");
-			sb.AppendLine("        }]");
-			sb.AppendLine("    },");
-			sb.AppendLine("    options: {");
-			sb.AppendLine("        scales: {");
-			sb.AppendLine("            y: {");
-			sb.AppendLine("                beginAtZero: true");
-			sb.AppendLine("            }");
-			sb.AppendLine("        }");
-			sb.AppendLine("    }");
-			sb.AppendLine("});");
-			sb.AppendLine("</script>");
-			sb.AppendLine("</body>");
-			sb.AppendLine("</html>");
+            // Получаем текущий HTML-код из декорированного представления
+            string tableHTML = File.ReadAllText(((TableView) decoratedView).FilePath);
 
-			return sb.ToString();
-		}
+            // Заменяем стиль с синей рамкой перед началом таблицы
+            string newStyle = "border: 3px solid blue;";
+            string oldStyle = "border: 3px solid black;";
+            tableHTML = tableHTML.Replace(oldStyle, newStyle, StringComparison.OrdinalIgnoreCase);
 
-		public void UpdateView (object? sender, EventArgs args)
-		{
-			Dictionary<int, char> data = model.GetData();
-			string markupHTML = GenerateHTML(data);
-			File.WriteAllText(FilePath, markupHTML);
-			Console.WriteLine($"Файл {FilePath} обновлен.");
-		}
+            // Записываем обновленный HTML-код обратно в файл
+            File.WriteAllText(((TableView) decoratedView).FilePath, tableHTML);
+            Console.WriteLine($"Файл {((TableView) decoratedView).FilePath} обновлен с синей рамкой.");
+        }
+    }
+    internal static void Execute ()
+    {
+        string filePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads", "output.html");
 
-		private readonly TableModel model;
-		internal readonly string FilePath;
+        if (File.Exists(filePath))
+        {
+            File.Delete(filePath);
+        }
 
-		internal TableView (TableModel model, string filePath)
-		{
-			this.model = model;
-			FilePath = filePath;
-			model.DataChanged += UpdateView; // Подписываемся на событие изменения данных
-		}
-	}
+        TableModel model = new();
+        TableView view = new(model, filePath);
+        TableController controller = new(model);
 
-	internal sealed class TableModel
-	{
-		private Dictionary<int, char> data = [];
+        Console.WriteLine($"Программа запущена. Изменения данных будут сохраняться в файле {filePath}");
+        Console.WriteLine($"{filePath}");
 
-		internal event EventHandler? DataChanged;
+        BlueBorderDecorator blueBorderView = new(view);
 
-		internal void SetData (Dictionary<int, char> newData)
-		{
-			data = newData;
-			NotifyObservers();
-		}
+        while (true)
+        {
+            Dictionary<int, char> data = GenerateRandomData();
+            controller.ChangeData(data);
 
-		internal Dictionary<int, char> GetData ()
-		{
-			return data;
-		}
+            Console.WriteLine($"Установлены новые данные:");
 
-		private void NotifyObservers ()
-		{
-			DataChanged?.Invoke(this, EventArgs.Empty);
-		}
-	}
+            foreach (KeyValuePair<int, char> pair in data)
+            {
+                Console.WriteLine($"{pair.Key}% - {pair.Value}");
+            }
 
-	internal sealed class TableController (TableModel model)
-	{
-		private readonly TableModel model = model;
+            Console.WriteLine();
 
-		public void ChangeData (Dictionary<int, char> newData)
-		{
-			model.SetData(newData);
-		}
-	}
+            blueBorderView.UpdateView(null, EventArgs.Empty);
 
-	internal sealed class BlueBorderDecorator (IView decoratedView) : IView
-	{
-		private readonly IView decoratedView = decoratedView;
+            Thread.Sleep(5000);
+        }
+    }
 
-		public void UpdateView (object? sender, EventArgs args)
-		{
-			decoratedView.UpdateView(sender, args);
+    private static Dictionary<int, char> GenerateRandomData ()
+    {
+        using RandomNumberGenerator rng = RandomNumberGenerator.Create();
+        int count = GetRandomNumber(rng, 1, 27); // Генерируем случайное количество символов от 1 до 26, так как в алфавите 26 букв
+        Dictionary<int, char> data = [];
+        HashSet<int> usedKeys = [];
 
-			// Получаем текущий HTML-код из декорированного представления
-			string tableHTML = File.ReadAllText(((TableView) decoratedView).FilePath);
+        for (int i = 0; i < count; i++)
+        {
+            int keyValue;
+            do
+            {
+                keyValue = GetRandomNumber(rng, 65, 91); // Генерируем случайный ASCII код для больших букв английского алфавита (65-90)
+            } while (!usedKeys.Add(keyValue)); // Проверяем уникальность ключа
 
-			// Найдем индекс начала таблицы в HTML
-			int tableStartIndex = tableHTML.IndexOf("<table", StringComparison.OrdinalIgnoreCase);
-			if (tableStartIndex != -1)
-			{
-				// Вставляем стиль с синей рамкой перед началом таблицы
-				string style = "<style>table { border: 2px solid blue; }</style>";
-				tableHTML = tableHTML.Insert(tableStartIndex, style);
-			}
+            char letter = (char) keyValue; // Получаем символ по ASCII коду
+            data.Add(keyValue, letter);
+        }
 
-			// Найдем индекс начала скрипта гистограммы в HTML
-			int chartScriptStartIndex = tableHTML.IndexOf("type: 'bar'", StringComparison.OrdinalIgnoreCase);
-			if (chartScriptStartIndex != -1)
-			{
-				// Заменяем цвет рамок и фона для гистограммы на темно-синий
-				int datasetsIndex = tableHTML.IndexOf("datasets: [{", chartScriptStartIndex, StringComparison.OrdinalIgnoreCase);
-				int closingBracketIndex = tableHTML.IndexOf('}', datasetsIndex);
-				if (datasetsIndex != -1 && closingBracketIndex != -1)
-				{
-					tableHTML = tableHTML.Insert(closingBracketIndex, ",\nbackgroundColor: 'rgba(0, 0, 255, 0.5)',\nborderColor: 'rgba(0, 0, 255, 1)'");
-				}
-			}
+        return data;
+    }
 
-			// Найдем индекс начала скрипта круговой диаграммы в HTML
-			int pieChartScriptStartIndex = tableHTML.IndexOf("type: 'pie'", StringComparison.OrdinalIgnoreCase);
-			if (pieChartScriptStartIndex != -1)
-			{
-				// Заменяем цвет рамок и фона для круговой диаграммы на темно-синий
-				int datasetsIndex = tableHTML.IndexOf("datasets: [{", pieChartScriptStartIndex, StringComparison.OrdinalIgnoreCase);
-				int closingBracketIndex = tableHTML.IndexOf('}', datasetsIndex);
-				if (datasetsIndex != -1 && closingBracketIndex != -1)
-				{
-					tableHTML = tableHTML.Insert(closingBracketIndex, ",\nbackgroundColor: 'rgba(0, 0, 255, 0.5)',\nborderColor: 'rgba(0, 0, 255, 1)'");
-				}
-			}
-
-			File.WriteAllText(((TableView) decoratedView).FilePath, tableHTML);
-
-			Console.WriteLine("Добавлена синяя рамка к представлению.");
-		}
-	}
-	internal static void Execute ()
-	{
-		string fileName = "output.html";
-		string filePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads", fileName);
-
-		if (File.Exists(filePath))
-		{
-			File.Delete(filePath);
-		}
-
-		TableModel model = new();
-		TableView view = new(model, filePath);
-		TableController controller = new(model);
-
-		Console.WriteLine($"Программа запущена. Изменения данных будут сохраняться в файле {fileName}");
-		Console.WriteLine($"{filePath}");
-
-		BlueBorderDecorator blueBorderView = new(view);
-
-		while (true)
-		{
-			Dictionary<int, char> data = GenerateRandomData();
-			controller.ChangeData(data);
-
-			Console.WriteLine($"Установлены новые данные:");
-
-			foreach (KeyValuePair<int, char> pair in data)
-			{
-				Console.WriteLine($"{pair.Key}% - {pair.Value}");
-			}
-
-			Console.WriteLine();
-
-			blueBorderView.UpdateView(null, EventArgs.Empty);
-
-			Thread.Sleep(5000);
-		}
-	}
-
-	private static Dictionary<int, char> GenerateRandomData ()
-	{
-		using RandomNumberGenerator rng = RandomNumberGenerator.Create();
-		int count = GetRandomNumber(rng, 1, 27); // Генерируем случайное количество символов от 1 до 26, так как в алфавите 26 букв
-		Dictionary<int, char> data = [];
-		HashSet<int> usedKeys = [];
-
-		for (int i = 0; i < count; i++)
-		{
-			int keyValue;
-			do
-			{
-				keyValue = GetRandomNumber(rng, 65, 91); // Генерируем случайный ASCII код для больших букв английского алфавита (65-90)
-			} while (!usedKeys.Add(keyValue)); // Проверяем уникальность ключа
-
-			char letter = (char) keyValue; // Получаем символ по ASCII коду
-			data.Add(keyValue, letter);
-		}
-
-		return data;
-	}
-
-	private static int GetRandomNumber (RandomNumberGenerator rng, int minValue, int maxValue)
-	{
-		byte [] uint32Buffer = new byte [4];
-		rng.GetBytes(uint32Buffer);
-		uint randomValue = BitConverter.ToUInt32(uint32Buffer, 0);
-		return (int) (minValue + (randomValue % (maxValue - minValue)));
-	}
+    private static int GetRandomNumber (RandomNumberGenerator rng, int minValue, int maxValue)
+    {
+        byte [] uint32Buffer = new byte [4];
+        rng.GetBytes(uint32Buffer);
+        uint randomValue = BitConverter.ToUInt32(uint32Buffer, 0);
+        return (int) (minValue + (randomValue % (maxValue - minValue)));
+    }
 }
