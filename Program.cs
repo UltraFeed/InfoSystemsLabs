@@ -2,7 +2,7 @@
 {
     private static void Main ()
     {
-        //ChainOfResponsibility.Execute();
+        //CompositeAndChainOfResponsibility.Execute();
         ObserverAndDecorator.Execute();
     }
 }
