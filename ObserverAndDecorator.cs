@@ -110,6 +110,7 @@ internal sealed class ObserverAndDecorator
             Console.WriteLine($"Файл {((TableView) decoratedView).FilePath} обновлен с синей рамкой.");
         }
     }
+
     internal static void Execute ()
     {
         string filePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads", "output.html");
