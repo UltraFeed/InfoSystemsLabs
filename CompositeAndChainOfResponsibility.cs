@@ -324,10 +324,7 @@ internal sealed class CompositeAndChainOfResponsibility
 
         string filePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads", "output.html");
 
-        if (File.Exists(filePath))
-        {
-            File.Delete(filePath);
-        }
+        File.Delete(filePath);
 
         File.WriteAllText(filePath, htmlContent.ToString());
 

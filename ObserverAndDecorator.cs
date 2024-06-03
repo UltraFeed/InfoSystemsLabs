@@ -35,24 +35,22 @@ internal sealed class ObserverAndDecorator
         private static string RenderRazorViewToString (string viewName, object model)
         {
             RazorLightEngine razorEngine = new RazorLightEngineBuilder()
-                .UseFileSystemProject(Directory.GetCurrentDirectory())
+                .UseEmbeddedResourcesProject(Assembly.GetExecutingAssembly())
                 .UseMemoryCachingProvider()
                 .Build();
 
             string templatePath = "InfoSystemsLabs.resources.ObserverAndDecorator.cshtml";
             string template;
 
-            using (Stream? stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(templatePath))
+            using (StreamReader reader = new(Assembly.GetExecutingAssembly().GetManifestResourceStream(templatePath)))
             {
-                using StreamReader reader = new(stream);
-                template = reader.ReadToEnd();
+                template = razorEngine.CompileRenderStringAsync(viewName, reader.ReadToEnd(), model).Result;
             }
 
-            // Компилируем и рендерим шаблон
-            template = razorEngine.CompileRenderStringAsync(viewName, template, model).Result;
             return template;
         }
     }
+
     internal sealed class TableModel
     {
         private Dictionary<int, char> data = [];
@@ -76,9 +74,14 @@ internal sealed class ObserverAndDecorator
         }
     }
 
-    internal sealed class TableController (TableModel model)
+    internal sealed class TableController
     {
-        private readonly TableModel model = model;
+        private readonly TableModel model;
+
+        internal TableController (TableModel model)
+        {
+            this.model = model;
+        }
 
         public void ChangeData (Dictionary<int, char> newData)
         {
@@ -111,10 +114,7 @@ internal sealed class ObserverAndDecorator
     {
         string filePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads", "output.html");
 
-        if (File.Exists(filePath))
-        {
-            File.Delete(filePath);
-        }
+        File.Delete(filePath);
 
         TableModel model = new();
         TableView view = new(model, filePath);
