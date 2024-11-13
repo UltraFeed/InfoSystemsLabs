@@ -1,160 +1,160 @@
-@using System.Collections.Generic
+﻿@using System.Collections.Generic
 @using System.Linq
 @model Dictionary<int, char>
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chart</title>
-    <style>
-        /* Стили */
-        td {
-            border: 3px solid black;
-            padding: 8px;
-            text-align: center;
-        }
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Chart</title>
+	<style>
+		/* Стили */
+		td {
+			border: 3px solid black;
+			padding: 8px;
+			text-align: center;
+		}
 
-        canvas {
-            border: 3px solid black;
-            margin-top: 10px;
-        }
+		canvas {
+			border: 3px solid black;
+			margin-top: 10px;
+		}
 
-        table { 
-            border: 3px solid black;
-            border-collapse: collapse;
-            width: 300px;
-        }
-    </style>
+		table {
+			border: 3px solid black;
+			border-collapse: collapse;
+			width: 300px;
+		}
+	</style>
 </head>
 <body>
-    <table id="Table">
-        <tr>
-            <!-- Заголовки -->
-            @foreach (var pair in Model)
-            {
-                <td>@pair.Value</td>
-            }
-        </tr>
-        <tr>
-            <!-- Ключи -->
-            @foreach (var pair in Model)
-            {
-                <td>@pair.Key</td>
-            }
-        </tr>
-    </table>
+	<table id="Table">
+		<tr>
+			<!-- Заголовки -->
+			@foreach (var pair in Model)
+			{
+				<td>@pair.Value</td>
+			}
+		</tr>
+		<tr>
+			<!-- Ключи -->
+			@foreach (var pair in Model)
+			{
+				<td>@pair.Key</td>
+			}
+		</tr>
+	</table>
 
-    <canvas id="myChart"></canvas>
-    <canvas id="pieChart"></canvas>
+	<canvas id="myChart"></canvas>
+	<canvas id="pieChart"></canvas>
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script>
-        // Гистограмма диаграмма
-        var ctx = document.getElementById('myChart').getContext('2d');
-        var myChart = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: [
-                    // Метки для гистограммы
-                    @foreach (var pair in Model)
-                    {
-                        @: '@pair.Value',
-                    }
-                ],
-                datasets: [{
-                    label: 'Values',
-                    data: [
-                        // Данные для гистограммы
-                        @foreach (var pair in Model)
-                        {
-                            @: @pair.Key,
-                        }
-                    ],
-                    backgroundColor: [
-                        // Цвета для гистограммы
-                        @foreach (var i in Enumerable.Range(0, Model.Count))
-                        {
-                            int red = i * 70 % 255;
-                            int green = i * 130 % 255;
-                            int blue = i * 200 % 255;
-                            @: 'rgba(@red, @green, @blue, 0.2)',
-                        }
-                    ],
-                    borderColor: [
-                        // Цвета границ для гистограммы
-                        @foreach (var i in Enumerable.Range(0, Model.Count))
-                        {
-                            int red = i * 70 % 255;
-                            int green = i * 130 % 255;
-                            int blue = i * 200 % 255;
-                            @: 'rgba(@red, @green, @blue, 1)',
-                        }
-                    ],
-                    borderWidth: 2
-                }]
-            },
-            options: {
-                scales: {
-                    y: {
-                        beginAtZero: true
-                    }
-                }
-            }
-        });
+	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+	<script>
+		// Гистограмма диаграмма
+		var ctx = document.getElementById('myChart').getContext('2d');
+		var myChart = new Chart(ctx, {
+			type: 'bar',
+			data: {
+				labels: [
+					// Метки для гистограммы
+		@foreach (var pair in Model)
+		{
+			@: '@pair.Value',
+		}
+				],
+				datasets: [{
+					label: 'Values',
+					data: [
+						// Данные для гистограммы
+		@foreach (var pair in Model)
+		{
+			@: @pair.Key,
+		}
+					],
+					backgroundColor: [
+						// Цвета для гистограммы
+		@foreach (var i in Enumerable.Range(0, Model.Count))
+		{
+			int red = i * 70 % 255;
+			int green = i * 130 % 255;
+			int blue = i * 200 % 255;
+			@: 'rgba(@red, @green, @blue, 0.2)',
+		}
+					],
+					borderColor: [
+						// Цвета границ для гистограммы
+		@foreach (var i in Enumerable.Range(0, Model.Count))
+		{
+			int red = i * 70 % 255;
+			int green = i * 130 % 255;
+			int blue = i * 200 % 255;
+			@: 'rgba(@red, @green, @blue, 1)',
+		}
+					],
+					borderWidth: 2
+				}]
+			},
+			options: {
+				scales: {
+					y: {
+						beginAtZero: true
+					}
+				}
+			}
+		});
 
-        // Круговая диаграмма
-        var ctx_pie = document.getElementById('pieChart').getContext('2d');
-        var myPieChart = new Chart(ctx_pie, {
-            type: 'pie',
-            data: {
-                labels: [
-                    // Метки для круговой диаграммы
-                    @foreach (var pair in Model)
-                    {
-                        @: '@pair.Value',
-                    }
-                ],
-                datasets: [{
-                    label: 'Values',
-                    data: [
-                        // Данные для круговой диаграммы
-                        @foreach (var pair in Model)
-                        {
-                            @: @pair.Key,
-                        }
-                    ],
-                    backgroundColor: [
-                        // Цвета для круговой диаграммы
-                        @foreach (var i in Enumerable.Range(0, Model.Count))
-                        {
-                            int red = i * 70 % 255;
-                            int green = i * 130 % 255;
-                            int blue = i * 200 % 255;
-                            @: 'rgba(@red, @green, @blue, 0.2)',
-                        }
-                    ],
-                    borderColor: [
-                        // Цвета границ для круговой диаграммы
-                        @foreach (var i in Enumerable.Range(0, Model.Count))
-                        {
-                            int red = i * 70 % 255;
-                            int green = i * 130 % 255;
-                            int blue = i * 200 % 255;
-                            @: 'rgba(@red, @green, @blue, 1)',
-                        }
-                    ],
-                    borderWidth: 2
-                }]
-            },
-            options: {
-                scales: {
-                    y: {
-                        beginAtZero: true
-                    }
-                }
-            }
-        });
-    </script>
+		// Круговая диаграмма
+		var ctx_pie = document.getElementById('pieChart').getContext('2d');
+		var myPieChart = new Chart(ctx_pie, {
+			type: 'pie',
+			data: {
+				labels: [
+					// Метки для круговой диаграммы
+		@foreach (var pair in Model)
+		{
+			@: '@pair.Value',
+		}
+				],
+				datasets: [{
+					label: 'Values',
+					data: [
+						// Данные для круговой диаграммы
+		@foreach (var pair in Model)
+		{
+			@: @pair.Key,
+		}
+					],
+					backgroundColor: [
+						// Цвета для круговой диаграммы
+		@foreach (var i in Enumerable.Range(0, Model.Count))
+		{
+			int red = i * 70 % 255;
+			int green = i * 130 % 255;
+			int blue = i * 200 % 255;
+			@: 'rgba(@red, @green, @blue, 0.2)',
+		}
+					],
+					borderColor: [
+						// Цвета границ для круговой диаграммы
+		@foreach (var i in Enumerable.Range(0, Model.Count))
+		{
+			int red = i * 70 % 255;
+			int green = i * 130 % 255;
+			int blue = i * 200 % 255;
+			@: 'rgba(@red, @green, @blue, 1)',
+		}
+					],
+					borderWidth: 2
+				}]
+			},
+			options: {
+				scales: {
+					y: {
+						beginAtZero: true
+					}
+				}
+			}
+		});
+	</script>
 </body>
 </html>
